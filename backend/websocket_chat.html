@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Chat - Real-time Messaging</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            height: 600px;
+        }
+
+        .sidebar {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .sidebar h2 {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .auth-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .auth-section input,
+        .auth-section button {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .auth-section input {
+            background: #f9f9f9;
+        }
+
+        .auth-section button {
+            background: #667eea;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .auth-section button:hover {
+            background: #764ba2;
+        }
+
+        .auth-section button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 13px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .status.connected {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .users-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .users-section h3 {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .user-item {
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            font-size: 14px;
+        }
+
+        .user-item:hover {
+            background: #efefef;
+        }
+
+        .user-item.active {
+            background: #667eea;
+            color: white;
+            border-color: #764ba2;
+        }
+
+        .chat-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .chat-header h2 {
+            color: #333;
+            font-size: 18px;
+        }
+
+        .online-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ccc;
+        }
+
+        .online-indicator.online {
+            background: #4caf50;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 10px 0;
+        }
+
+        .message {
+            display: flex;
+            gap: 10px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.sent {
+            justify-content: flex-end;
+        }
+
+        .message.received {
+            justify-content: flex-start;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 10px;
+            word-wrap: break-word;
+            font-size: 14px;
+        }
+
+        .message.sent .message-content {
+            background: #667eea;
+            color: white;
+            border-bottom-right-radius: 0;
+        }
+
+        .message.received .message-content {
+            background: #f1f1f1;
+            color: #333;
+            border-bottom-left-radius: 0;
+        }
+
+        .message-time {
+            font-size: 12px;
+            color: #999;
+            align-self: flex-end;
+            margin-top: 5px;
+        }
+
+        .input-section {
+            display: flex;
+            gap: 10px;
+            border-top: 2px solid #eee;
+            padding-top: 10px;
+        }
+
+        .input-section input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            background: #f9f9f9;
+        }
+
+        .input-section input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+        }
+
+        .input-section button {
+            padding: 12px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .input-section button:hover {
+            background: #764ba2;
+        }
+
+        .input-section button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .empty-chat {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #999;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="auth-section">
+                <h2>Login</h2>
+                <input type="email" id="email" placeholder="Email" value="testuser1_1771432731@example.com">
+                <input type="password" id="password" placeholder="Password" value="TestPass123!">
+                <button id="loginBtn" onclick="login()">Login</button>
+            </div>
+
+            <div id="statusDiv" class="status disconnected">Not Connected</div>
+
+            <div class="users-section" id="usersSection" style="display: none;">
+                <h3>💬 Available Users</h3>
+                <div id="usersList"></div>
+            </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="chat-container">
+            <div class="chat-header" id="chatHeader" style="display: none;">
+                <h2 id="chatWith">Select a user to chat</h2>
+                <div class="online-indicator" id="onlineIndicator"></div>
+            </div>
+
+            <div id="messagesContainer" class="messages">
+                <div class="empty-chat">👋 Login and select a user to start chatting</div>
+            </div>
+
+            <div class="input-section" id="inputSection" style="display: none;">
+                <input type="text" id="messageInput" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
+                <button onclick="sendMessage()" id="sendBtn">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration - Change this to match your backend URL
+        const API_BASE_URL = window.location.origin === 'file://' 
+            ? 'http://localhost:8000' 
+            : `${window.location.protocol}//${window.location.hostname}:8000`;
+        
+        let currentUser = null;
+        let selectedUserId = null;
+        let ws = null;
+        let allUsers = [];
+
+        // Login function
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (!email || !password) {
+                alert('Please enter email and password');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    alert('Login failed: ' + (data.detail || 'Unknown error'));
+                    return;
+                }
+
+                currentUser = { token: data.access_token };
+
+                // Get current user info
+                const meResponse = await fetch(`${API_BASE_URL}/users/me`, {
+                    headers: { 'Authorization': `Bearer ${data.access_token}` }
+                });
+                
+                if (!meResponse.ok) {
+                    throw new Error('Failed to get user info');
+                }
+                
+                const meData = await meResponse.json();
+                currentUser.id = meData.id;
+                currentUser.username = meData.username;
+
+                // Load all users
+                await loadUsers();
+
+                // Update UI
+                document.getElementById('statusDiv').textContent = `✅ Connected as ${currentUser.username}`;
+                document.getElementById('statusDiv').className = 'status connected';
+                document.getElementById('loginBtn').textContent = 'Logged In';
+                document.getElementById('loginBtn').disabled = true;
+                document.getElementById('usersSection').style.display = 'flex';
+
+            } catch (error) {
+                alert('Error: ' + error.message);
+                console.error('Login error:', error);
+            }
+        }
+
+        // Load all users
+        async function loadUsers() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/users/list/all`, {
+                    headers: { 'Authorization': `Bearer ${currentUser.token}` }
+                });
+
+                if (!response.ok) {
+                    console.error('Failed to load users:', response.statusText);
+                    // Fallback to empty list
+                    allUsers = [];
+                    renderUsersList();
+                    return;
+                }
+
+                allUsers = await response.json();
+                renderUsersList();
+                
+            } catch (error) {
+                console.error('Error loading users:', error);
+                allUsers = [];
+                renderUsersList();
+            }
+        }
+
+        // Render users list
+        function renderUsersList() {
+            const usersList = document.getElementById('usersList');
+            usersList.innerHTML = '';
+
+            allUsers.forEach(user => {
+                if (user.id !== currentUser.id) {
+                    const userItem = document.createElement('div');
+                    userItem.className = 'user-item';
+                    userItem.textContent = user.username;
+                    userItem.onclick = () => selectUser(user);
+                    usersList.appendChild(userItem);
+                }
+            });
+        }
+
+        // Select user to chat with
+        function selectUser(user) {
+            selectedUserId = user.id;
+
+            // Update UI
+            document.querySelectorAll('.user-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Add active class to the clicked element
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+
+            document.getElementById('chatHeader').style.display = 'flex';
+            document.getElementById('chatWith').textContent = `💬 Chatting with ${user.username}`;
+            document.getElementById('inputSection').style.display = 'flex';
+            document.getElementById('messagesContainer').innerHTML = '';
+
+            // Disconnect previous WebSocket connection if exists
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.close();
+            }
+
+            // Connect WebSocket
+            connectWebSocket(user);
+        }
+
+        // Connect to WebSocket
+        function connectWebSocket(user) {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                ? 'localhost:8000' 
+                : `${window.location.hostname}:8000`;
+            const uri = `${protocol}//${wsHost}/ws/chat/${selectedUserId}?token=${currentUser.token}`;
+
+            console.log('Connecting to WebSocket:', uri);
+            ws = new WebSocket(uri);
+
+            ws.onopen = () => {
+                console.log('WebSocket connected to', user.username);
+                document.getElementById('onlineIndicator').classList.add('online');
+                
+                // Load message history
+                loadMessageHistory(selectedUserId);
+            };
+
+            ws.onmessage = (event) => {
+                try {
+                    const message = JSON.parse(event.data);
+                    console.log('Received message:', message);
+                    displayMessage(message);
+                } catch (error) {
+                    console.error('Error parsing message:', error);
+                }
+            };
+
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+                document.getElementById('onlineIndicator').classList.remove('online');
+                alert('WebSocket connection error. Please try again.');
+            };
+
+            ws.onclose = () => {
+                console.log('WebSocket disconnected');
+                document.getElementById('onlineIndicator').classList.remove('online');
+            };
+        }
+
+        // Load message history from database
+        async function loadMessageHistory(userId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/messages/conversation/${userId}`, {
+                    headers: { 'Authorization': `Bearer ${currentUser.token}` }
+                });
+
+                if (!response.ok) {
+                    console.error('Failed to load message history');
+                    return;
+                }
+
+                const messages = await response.json();
+                const messagesContainer = document.getElementById('messagesContainer');
+                messagesContainer.innerHTML = ''; // Clear existing messages
+
+                messages.forEach(message => {
+                    displayMessage(message);
+                });
+            } catch (error) {
+                console.error('Error loading message history:', error);
+            }
+        }
+
+        // Display message
+        function displayMessage(message) {
+            const messagesContainer = document.getElementById('messagesContainer');
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${message.sender_id === currentUser.id ? 'sent' : 'received'}`;
+
+            const time = new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            messageDiv.innerHTML = `
+                <div>
+                    <div class="message-content">${escapeHtml(message.content)}</div>
+                    <div class="message-time">${time}</div>
+                </div>
+            `;
+
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Send message
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+
+            if (!message) {
+                return;
+            }
+
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                alert('WebSocket is not connected. Please select a user to chat with.');
+                return;
+            }
+
+            try {
+                ws.send(JSON.stringify({ content: message }));
+                input.value = '';
+            } catch (error) {
+                console.error('Error sending message:', error);
+                alert('Failed to send message. Please try again.');
+            }
+        }
+
+        // Handle Enter key
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        // Escape HTML for security
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
