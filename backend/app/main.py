@@ -6,6 +6,8 @@ from pydantic import ValidationError
 import os
 from app.database import Base, engine
 from app.config import settings
+from app.routers import comment_routes, comment_updates, comment_votes,  reports,  votes 
+
 
 
 Base.metadata.create_all(bind=engine)
@@ -23,3 +25,10 @@ app.add_middleware(
 @app.get("/")
 async def read_root():
     return {"message": "Welcome to the Nebula API!"}
+
+
+app.include_router(comment_routes.router)
+app.include_router(comment_updates.router)
+app.include_router(comment_votes.router)
+app.include_router(reports.router)
+app.include_router(votes.router)
