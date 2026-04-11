@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <rect width="64" height="64" rx="18" fill="url(#bg)"/>
+  <rect x="8.5" y="8.5" width="47" height="47" rx="14" stroke="rgba(255,255,255,0.16)"/>
+  <path d="M17 11C20 7 23 6 25 12C23.5 16 21 18 17 20C16 17 16.2 14 17 11Z" fill="url(#flame)" fill-opacity="0.9"/>
+  <path d="M44 9C47 6 50 8 49 13C48 17 46 20 42 22C41 17 41.5 13 44 9Z" fill="url(#flame)" fill-opacity="0.92"/>
+  <path d="M27 6C30 3 34 3 37 7C35.8 11 34 13 32 14C30 13 28.4 11 27 6Z" fill="url(#flameCore)" fill-opacity="0.75"/>
+  <path d="M32 8C42 9 50 16 51 27C52 36 48 44 40 49C37 51 36 56 32 56C28 56 27 51 24 49C16 44 12 36 13 27C14 16 22 9 32 8Z" fill="url(#face)"/>
+  <path d="M19 17C24 13 29 11 36 12" stroke="#74E9FF" stroke-opacity="0.3" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M22 25C24.2 24.2 25.9 24.4 27 26.2V34.8C25.9 36.3 24.2 36.6 22 35.5C21.4 31.8 21.4 28.3 22 25Z" fill="url(#eye)"/>
+  <path d="M42 25C39.8 24.2 38.1 24.4 37 26.2V34.8C38.1 36.3 39.8 36.6 42 35.5C42.6 31.8 42.6 28.3 42 25Z" fill="url(#eye)"/>
+  <path d="M27 44C28.7 45 30.3 45.5 32 45.5C33.7 45.5 35.3 45 37 44" stroke="#7CD8FF" stroke-opacity="0.28" stroke-width="2" stroke-linecap="round"/>
+  <ellipse cx="32" cy="58" rx="12" ry="4" fill="url(#mist)"/>
+  <defs>
+    <radialGradient id="bg" cx="0" cy="0" r="1" gradientTransform="translate(20 14) rotate(48) scale(54)">
+      <stop stop-color="#173447"/>
+      <stop offset="0.48" stop-color="#08121D"/>
+      <stop offset="1" stop-color="#03050A"/>
+    </radialGradient>
+    <radialGradient id="face" cx="0" cy="0" r="1" gradientTransform="translate(32 24) rotate(90) scale(30 24)">
+      <stop stop-color="#132534"/>
+      <stop offset="1" stop-color="#04070E"/>
+    </radialGradient>
+    <linearGradient id="eye" x1="32" y1="24" x2="32" y2="36" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B6FBFF"/>
+      <stop offset="1" stop-color="#58E6F7"/>
+    </linearGradient>
+    <linearGradient id="flame" x1="32" y1="6" x2="32" y2="22" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#C8FDFF"/>
+      <stop offset="0.35" stop-color="#7AEFFF"/>
+      <stop offset="1" stop-color="#2A74FF" stop-opacity="0.05"/>
+    </linearGradient>
+    <linearGradient id="flameCore" x1="32" y1="4" x2="32" y2="14" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E7FFFF"/>
+      <stop offset="1" stop-color="#5FE7FF" stop-opacity="0.1"/>
+    </linearGradient>
+    <radialGradient id="mist" cx="0" cy="0" r="1" gradientTransform="translate(32 58) scale(12 4)">
+      <stop stop-color="#7DDFFF" stop-opacity="0.24"/>
+      <stop offset="1" stop-color="#7DDFFF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+</svg>
