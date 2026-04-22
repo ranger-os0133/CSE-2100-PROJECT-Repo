@@ -19,5 +19,7 @@ class PostOut(PostBase):
     display_name: str
     files: list[FileOut] = []
     created_at: datetime
+    score: int = 0
+    comment_count: int = 0
 
     model_config = ConfigDict(from_attributes=True)

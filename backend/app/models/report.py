@@ -25,3 +25,4 @@ class Report(Base):
 
     reporter = relationship("User")
     post = relationship("Post")
+    comment = relationship("Comment")

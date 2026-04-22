@@ -1,8 +1,14 @@
+import enum
 from datetime import datetime, timezone
 
 from sqlalchemy import Boolean, Column, DateTime, Integer, String
 
 from app.database import Base
+
+
+class UserRole(str, enum.Enum):
+	USER = "user"
+	ADMIN = "admin"
 
 class User(Base):
 	__tablename__ = "users"
@@ -12,4 +18,5 @@ class User(Base):
 	email = Column(String(255), unique=True, index=True, nullable=False)
 	hashed_password = Column(String(255), nullable=False)
 	is_active = Column(Boolean, default=True, nullable=False)
+	role = Column(String(32), default=UserRole.USER.value, nullable=False, index=True)
 	created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
