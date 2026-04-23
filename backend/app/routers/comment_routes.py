@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.comment import Comment
 from app.models.post import Post
+from app.models.report import Report
 from app.models.user import User
 from app.routers.auth import get_current_user
 from app.schemas.comment import CommentCreate, CommentUpdate, CommentOut
@@ -104,6 +105,7 @@ def delete_comment(
             detail="Not authorized to delete this comment"
         )
 
+    db.query(Report).filter(Report.comment_id == comment_id).delete(synchronize_session=False)
     db.delete(comment)
     db.commit()
     return {"message": "Successfully deleted comment"}
