@@ -6,8 +6,8 @@ from app.models.report import Report, ReportStatus
 from app.models.post import Post
 from app.models.comment import Comment
 from app.models.user import User
-from app.routers.auth import get_current_user
-from app.schemas.report import ReportCreate, ReportOut
+from app.routers.auth import get_current_user, require_admin
+from app.schemas.report import ReportCreate, ReportOut, ReportReviewRequest
 
 router = APIRouter(prefix="/reports", tags=["reports"])
 
@@ -51,33 +51,28 @@ def create_report(
     db.refresh(report)
     return {"message": "Successfully created report", "data": ReportOut.model_validate(report)}
 
+@router.get("/mine", response_model=list[ReportOut])
+def list_my_reports(
+    db: Session = Depends(get_db)
+    ,current_user: User = Depends(get_current_user)
+):
+    return db.query(Report).filter(Report.reporter_id == current_user.id).all()
+
+
 @router.get("/", response_model=list[ReportOut])
 def list_reports(
     status_filter: ReportStatus | None = None,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
 ):
     query = db.query(Report)
     if status_filter:
         query = query.filter(Report.status == status_filter)
-    return query.all()
+    return query.order_by(Report.created_at.desc()).all()
 
 @router.get("/{report_id}", response_model=ReportOut)
 def get_report(
     report_id: int,
-    db: Session = Depends(get_db)
-):
-    report = db.query(Report).filter(Report.id == report_id).first()
-    if not report:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Report not found"
-        )
-    return report
-
-@router.put("/{report_id}/review")
-def review_report(
-    report_id: int,
-    new_status: ReportStatus,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -87,8 +82,28 @@ def review_report(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Report not found"
         )
+    if report.reporter_id != current_user.id and current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to view this report"
+        )
+    return report
 
-    report.status = new_status
+@router.put("/{report_id}/review")
+def review_report(
+    report_id: int,
+    payload: ReportReviewRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
+    report = db.query(Report).filter(Report.id == report_id).first()
+    if not report:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Report not found"
+        )
+
+    report.status = payload.status
     db.commit()
     db.refresh(report)
     return {"message": "Successfully reviewed report", "data": ReportOut.model_validate(report)}
@@ -97,7 +112,7 @@ def review_report(
 def delete_report(
     report_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_admin)
 ):
     report = db.query(Report).filter(Report.id == report_id).first()
     if not report:
