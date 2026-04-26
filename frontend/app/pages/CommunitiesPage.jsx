@@ -124,7 +124,7 @@ export default function CommunitiesPage() {
 
   return (
     <div className="page-shell">
-      <section className="panel page-hero">
+      <section className="panel page-hero page-hero--compact">
         <span className="dashboard-badge">
           <Compass size={14} />
           Community network
@@ -133,7 +133,7 @@ export default function CommunitiesPage() {
         <p>Clubs, cohorts, and interest spaces now live in a cleaner browse-and-create experience.</p>
       </section>
 
-      <form onSubmit={handleCreateCommunity} className="panel communities-create-form">
+      <form onSubmit={handleCreateCommunity} className="panel wide-panel communities-create-form">
         <input
           type="text"
           placeholder="Community name"
