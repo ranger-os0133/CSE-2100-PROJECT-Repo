@@ -193,7 +193,7 @@ This is a university project under **CSE 2100**, but contributions and suggestio
 | 2303133 | [@ranger-os0133](https://github.com/ranger-os0133) |
 | 2303134 | [@Arpon2005](https://github.com/Arpon2005) |
 | 2303147 | [@uranium147](https://github.com/uranium147) |
-| — | [@dattaemon247-art](https://github.com/dattaemon247-art) |
+| 2303173 | [@dattaemon247-art](https://github.com/dattaemon247-art) |
 
 ---
 
