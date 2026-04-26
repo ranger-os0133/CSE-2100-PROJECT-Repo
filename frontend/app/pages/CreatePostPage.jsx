@@ -55,14 +55,14 @@ export default function CreatePostPage() {
 
   return (
     <div className="page-shell">
-      <section className="panel page-hero">
+      <section className="panel page-hero page-hero--compact">
         <span className="dashboard-badge">Compose post</span>
         <h1>Publish without touching the feed state.</h1>
         <p>This page handles post creation on its own, then sends you back to the feed after success.</p>
       </section>
 
-      <section className="panel" style={{ maxWidth: 820, width: '100%', margin: '0 auto' }}>
-        <div className="panel-header" style={{ marginBottom: 20 }}>
+      <section className="panel wide-panel">
+        <div className="panel-header panel-header--spaced">
           <div>
             <h2>Create post</h2>
             <p>Write your post, attach files if needed, and publish from a dedicated page.</p>

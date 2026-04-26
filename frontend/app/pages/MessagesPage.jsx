@@ -197,7 +197,7 @@ export default function MessagesPage() {
           Direct messages
         </span>
         <h1>Private conversations with a cleaner rhythm.</h1>
-        <p>Jump between chats, start a fresh thread, and keep the conversation focused without the old cramped layout.</p>
+        <p>Start a legendary conversation with your pals.</p>
       </section>
 
       <div className="messages-shell">
